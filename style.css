@@ -1,0 +1,81 @@
+*{
+    -webkit-user-select:none;
+}
+body{
+    margin: 0;
+    padding-top: 0;
+}
+#pad {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #113F59;
+    margin-top: 10px;
+    color: #ffffff;
+}
+.col{
+    position:fixed;
+    top:0px;
+    bottom:0px;
+    background-color: #113F59;
+    width:20%;
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling: touch;
+
+}
+
+.j{
+    position:relative;
+    box-sizing:border-box;
+    font-size: 14px;
+    word-wrap:normal;
+    height:12.5%;
+    width:100%;
+    background-color: #19BEC0;
+    box-shadow: 0 0 20px -4px black inset;
+    padding: 12px;
+    transition: box-shadow 50ms ease-in-out;
+    border: 1px black;
+}
+.jst{
+    box-shadow: 0 0 20px -8px black inset;
+}
+.jstatus{
+    position: absolute;
+    bottom:20px;
+    height:4px;
+    background-color:#FC4349;
+    width:calc(100% - 24px);
+    transition: width 400ms ease-in-out;
+    z-index: 2;
+}
+.jtotal{
+    position: absolute;
+    bottom:20px;
+    box-shadow: 0px 0px 1px 1px black;
+    height:4px;
+    background-color:black;
+    width:calc(100% - 24px);
+    z-index: 1;
+}
+.blank{
+    background-color: white;
+}
+#col1{
+    left:0;
+}
+#col2{
+    left:20%;
+}
+#col3{
+    left:40%;
+}
+#col4{
+    left:60%;
+}
+#col5{
+    left:80%;
+}

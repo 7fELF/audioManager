@@ -1,0 +1,116 @@
+<script src="audioManager.js"></script>
+<script>
+
+
+  var salutcc = function(){
+    this.salut = new audioManager("./tracks/This Means War - Avenged Sevenfold.mp3");
+
+    this.salut.ontimechange = function(time){
+      if(this.salut.playing) document.getElementById("time").value = Math.round(time) + "  Secondes";
+      else document.getElementById("time").value = 0;
+    };
+    this.salut.onready = function (){
+      document.getElementById("time").value = "Ready";
+    };
+
+  };
+salutcc.prototype.play = function(){
+    if(this.salut.playing)this.salut.stop();
+    else this.salut.play();
+
+}
+
+  var salutc = new salutcc();
+
+
+
+</script>
+<html>
+    <head>
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    </head>
+	<body>
+
+		<input type="button" onclick="salut.play(0);" value="play">
+        <input type="button" onclick="salut.stop();" value="stop">
+        <input type="text" id="time"/>
+
+    <div id="sampler">
+      <br/>
+      <div class="sample" data-file="tom0"></div>
+      <div class="sample" data-file="tom3"></div>
+      <div class="sample" data-file="tom2"></div>
+      <div class="sample" data-file="tom1"></div>
+      <br/>
+
+      <div class="sample white" ></div>
+      <div class="sample white" ></div>
+      <div class="sample" data-file="crash"></div>
+      <div class="sample" data-file="ride"></div>
+      <br/>
+      <div class="sample" data-file="kick"></div>
+      <div class="sample" data-file="sn"></div>
+
+      <div class="sample" data-file="hh"></div>
+      <div class="sample" data-file="salutc"></div>
+    </div>
+	</body>
+</html>
+<style>
+  body{
+    margin:0;
+    padding:0;
+  }
+  .sample{
+    width: calc(25% - 20px);
+    height:calc(25% - 20px);
+    background-color: #003d4c;
+    margin: 5px;
+    display: inline-block;
+}
+  .white{
+    background-color: white;
+  }
+</style>
+<script>
+  var crash = new audioManager("/tracks/crash.mp3", true);
+  var hh = new audioManager("/tracks/hh.mp3", true);
+  var kick = new audioManager("/tracks/kick.mp3", true);
+  var sn = new audioManager("/tracks/sn.mp3", true);
+  var tom1 = new audioManager("/tracks/tom1.mp3", true);
+  var tom2 = new audioManager("/tracks/tom2.mp3", true);
+  var tom3 = new audioManager("/tracks/tom3.mp3", true);
+  var tom0 = new audioManager("/tracks/tom0.mp3", true);
+  var ride = new audioManager("/tracks/ride.mp3", true);
+
+  var samples = document.getElementsByClassName("sample");
+    for (var i = samples.length - 1; i >= 0; i--) {
+
+
+      samples[i].addEventListener('touchstart', function(e){
+        if(this.dataset.file !== undefined) {
+          eval(this.dataset.file + ".play();");
+          this.style.backgroundColor = "red";
+          window.setTimeout(function () {
+            this.style.backgroundColor = "#003d4c";
+          }.bind(this), 20);
+        }
+      }, false);
+
+      samples[i].addEventListener('mousedownn', function(e){
+        if(this.dataset.file !== undefined) {
+          eval(this.dataset.file + ".play();");
+          this.style.backgroundColor = "red";
+          window.setTimeout(function () {
+            this.style.backgroundColor = "#003d4c";
+          }.bind(this), 20);
+        }
+      }, false);
+
+    };
+  document.body.addEventListener('touchmove', function(e){
+    e.preventDefault();
+  });
+
+</script>
