@@ -1,4 +1,4 @@
-var nodeAddress = "http://192.168.1.12:8080";
+var nodeAddress = "http://192.168.1.10:8080";
 
 document.body.addEventListener('touchmove',function(e){
     e.preventDefault();
@@ -33,7 +33,7 @@ function pad(url, col, title, nb){
     if(url != "blank"){
         var file = new AudioFile(url);
         el.className = "j";
-        file.audio.onloadeddata = function(){
+        file.audio.oncanplaythrough = function(){
             el.style.backgroundColor = "blue";
         };
         this.file = file;
@@ -54,6 +54,7 @@ function pad(url, col, title, nb){
 
             if(!window.locked) {
 
+                socket.emit('play', {"nb": nb, "time": Date.now()});
 
 
                 if(file.playing()){
@@ -64,7 +65,6 @@ function pad(url, col, title, nb){
                     for (var i = padn.length - 1; i >= 0; i--) {
                         if(padn[i].file.audio.currentTime && padn[i].file.playing()) padn[i].stop();
                     }
-                    socket.emit('play', {"nb": nb, "time": Date.now()});
                     //file.play();
 
                     el.style.backgroundColor = "lightgreen";
