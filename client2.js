@@ -123,7 +123,7 @@ function getTracklist(url){
     xhr.send(null);
 }
 
-var tracklistUrl = "tracklists/3.json";
+var tracklistUrl = "tracklists/2.json";
 getTracklist(tracklistUrl);
 
 
