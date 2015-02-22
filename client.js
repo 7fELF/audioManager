@@ -15,7 +15,6 @@ function AudioFile(url) {
 AudioFile.prototype.playing = function(){ return !this.audio.paused; };
 AudioFile.prototype.play = function(){ this.audio.play(); };
 AudioFile.prototype.stop = function(){ this.pause(); this.audio.currentTime = 0; };
-AudioFile.prototype.preload = function(){ this.play(); this.pause(); this.audio.currentTime = 0; };
 AudioFile.prototype.goTo = function(t){ this.audio.currentTime = t; };
 AudioFile.prototype.pause = function(){ this.audio.pause(); };
 AudioFile.prototype.volume = function(v){ this.audio.volume = v; };
@@ -49,23 +48,20 @@ function pad(url, col, title, nb){
 }
 
 pad.prototype.trigged = function(e){
-    this.el.className = "j";
     if((this.posY - e.pageY) < -20 || (this.posY - e.pageY) > 20 ) window.locked = true;
     else window.locked = false;
-
 
     if(!window.locked) {
         socket.emit('play', {"nb": this.nb, "time": Date.now()});
         if(this.file.playing()){
-            this.file.stop();
-            this.el.style.backgroundColor = "red";
+            this.stop();
         }
         else{
             for (var i = padn.length - 1; i >= 0; i--) {
                 if(padn[i].file.audio.currentTime && padn[i].file.playing()) padn[i].stop();
             }
             this.file.play();
-            this.el.style.backgroundColor = "lightgreen";
+            this.el.style.backgroundColor = "#113F59";
         }
     }
     window.locked = false;
@@ -80,7 +76,7 @@ pad.prototype.timeupdate = function(){
 };
 pad.prototype.stop = function(){
     this.file.stop();
-    this.el.style.backgroundColor = "red";
+    this.el.style.backgroundColor = "#19BEC0";
 };
 pad.prototype.createElement = function(){
     this.el = document.createElement("div");
@@ -91,7 +87,7 @@ pad.prototype.createElement = function(){
 pad.prototype.initAudio = function(){
     this.file = new AudioFile(this.url);
     this.file.audio.oncanplaythrough = function(){
-        this.el.style.backgroundColor = "blue";
+        //this.el.style.backgroundColor = "#113F59";
     }.bind(this);
 
     this.file.audio.ontimeupdate = this.timeupdate.bind(this);
@@ -101,12 +97,6 @@ function loadTrackList(tk){
     for (var i = 0; i < Object.keys(tk).length; i++) {
         padn.push(new pad(tk[i]["url"], tk[i]["c"], tk[i]["title"], i));
     };
-}
-
-function preload(){
-        for (var i = 0; i < Object.keys(padn).length; i++) {
-            padn[i].file.preload();
-        };
 }
 
 function getTracklist(url){

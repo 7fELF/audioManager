@@ -52,6 +52,7 @@ body{
     transition: width 400ms ease-in-out;
     z-index: 2;
 }
+
 .jtotal{
     position: absolute;
     bottom:20px;
@@ -61,9 +62,7 @@ body{
     width:calc(100% - 24px);
     z-index: 1;
 }
-.blank{
-    background-color: white;
-}
+
 #col1{
     left:0;
 }
