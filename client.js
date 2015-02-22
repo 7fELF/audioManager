@@ -1,17 +1,16 @@
 var nodeAddress = "http://192.168.1.10:8080";
+var padn = [];
+var tracklistUrl = "tracklists/1.json";
+
 
 document.body.addEventListener('touchmove',function(e){
     e.preventDefault();
 });
+
 function AudioFile(url) {
     this.audio = document.createElement("audio");
     this.audio.src = url;
-
-    //this.audio.controls = true;
     this.audio.preload = this.elementPreload ;
-
-    //document.getElementById("col1").appendChild(this.audio);
-
 }
 AudioFile.prototype.playing = function(){ return !this.audio.paused; };
 AudioFile.prototype.play = function(){ this.audio.play(); };
@@ -24,53 +23,28 @@ AudioFile.prototype.elementPreload = "none";
 
 
 function pad(url, col, title, nb){
-
-    this.el = document.createElement("div");
-    this.el.innerHTML = title + "<div class=jstatus></div><div class=jtotal></div>";
     this.nb = nb;
+    this.url = url;
+    this.title = title;
+    this.col = col;
+    this.file = undefined;
 
-    document.getElementById("col" + col).appendChild(this.el);
-    if(url != "blank"){
-        var file = new AudioFile(url);
-        this.el.className = "j";
-        file.audio.oncanplaythrough = function(){
-            this.el.style.backgroundColor = "blue";
-        };
-        this.file = file;
-        function timeupdate(){
-            this.el.childNodes[1].style.width =  (file.audio.currentTime/file.audio.duration)*100 + "%";
-            if(file.audio.currentTime == 0) this.el.childNodes[1].style.width =  "calc(100% - 24px)";
+    this.createElement();
+    if(this.url !== undefined) this.initAudio();
 
-            if((file.audio.currentTime - Math.round(file.audio.currentTime)) > 0.1){
-                socket.emit('time', {"nb":this.nb, "time":this.el.childNodes[1].style.width});
-            }
-        }
-        file.audio.ontimeupdate = timeupdate.bind(this);
-
-        if ('ontouchstart' in document.documentElement) {
-            this.el.addEventListener('touchend', this.trigged.bind(this), false);
-            this.el.addEventListener('touchmove', function(e){
-                e.stopPropagation();
-
-            }, false);
-            this.el.addEventListener('touchstart', function(e){
-
-                this.el.className = "j jst";
-                this.posY = e.pageY;
-                this.posX = e.pageX;
-            }, false);
-        }
-        else{
-            this.el.addEventListener('click', this.trigged.bind(this), false);
-        }
-
-        this.stop = function(){
-            file.stop();
-            this.el.style.backgroundColor = "red";
-        }
+    if ('ontouchstart' in document.documentElement) {
+        this.el.addEventListener('touchend', this.trigged.bind(this), false);
+        this.el.addEventListener('touchmove', function(e){
+            e.stopPropagation();
+        }, false);
+        this.el.addEventListener('touchstart', function(e){
+            this.el.className = "j jst";
+            this.posY = e.pageY;
+            this.posX = e.pageX;
+        }.bind(this), false);
     }
     else{
-        this.el.className = "j blank";
+        this.el.addEventListener('click', this.trigged.bind(this), false);
     }
 }
 
@@ -96,15 +70,37 @@ pad.prototype.trigged = function(e){
     }
     window.locked = false;
 };
+pad.prototype.timeupdate = function(){
+    this.el.childNodes[1].style.width =  (this.file.audio.currentTime/this.file.audio.duration)*100 + "%";
+    if(this.file.audio.currentTime == 0) this.el.childNodes[1].style.width =  "calc(100% - 24px)";
 
-var padn = [];
+    if((this.file.audio.currentTime - Math.round(this.file.audio.currentTime)) > 0.1){
+        socket.emit('time', {"nb":this.nb, "time":this.el.childNodes[1].style.width});
+    }
+};
+pad.prototype.stop = function(){
+    this.file.stop();
+    this.el.style.backgroundColor = "red";
+};
+pad.prototype.createElement = function(){
+    this.el = document.createElement("div");
+    this.el.innerHTML = this.title + "<div class=jstatus></div><div class=jtotal></div>";
+    this.el.className = "j";
+    document.getElementById("col" + this.col).appendChild(this.el);
+};
+pad.prototype.initAudio = function(){
+    this.file = new AudioFile(this.url);
+    this.file.audio.oncanplaythrough = function(){
+        this.el.style.backgroundColor = "blue";
+    }.bind(this);
+
+    this.file.audio.ontimeupdate = this.timeupdate.bind(this);
+};
 
 function loadTrackList(tk){
     for (var i = 0; i < Object.keys(tk).length; i++) {
         padn.push(new pad(tk[i]["url"], tk[i]["c"], tk[i]["title"], i));
-
     };
-
 }
 
 function preload(){
@@ -112,9 +108,6 @@ function preload(){
             padn[i].file.preload();
         };
 }
-
-
-
 
 function getTracklist(url){
     var xhr = new XMLHttpRequest();
@@ -130,17 +123,18 @@ function getTracklist(url){
     xhr.send(null);
 }
 
-var tracklistUrl = "tracklists/1.json";
 getTracklist(tracklistUrl);
 
 
 
-
+/**
+ * Socket.io
+ */
 var socket = io.connect(nodeAddress);
 socket.on('play', function(r) {
+    console.log('Play command from socket.io', r);
     if(padn[r.nb].file.playing()) padn[r.nb].file.stop();
     else{
-
             padn[r.nb].file.play();
             padn[r.nb].file.currentTime = (Date.now() - r.time)/1000;
     }
