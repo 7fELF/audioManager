@@ -24,81 +24,78 @@ AudioFile.prototype.elementPreload = "none";
 
 
 function pad(url, col, title, nb){
-    var posY;
-    var posX;
-    var el = document.createElement("div");
-    this.el = el;
-    el.innerHTML = title + "<div class=jstatus></div><div class=jtotal></div>";
-    document.getElementById("col" + col).appendChild(el);
+
+    this.el = document.createElement("div");
+    this.el.innerHTML = title + "<div class=jstatus></div><div class=jtotal></div>";
+    this.nb = nb;
+
+    document.getElementById("col" + col).appendChild(this.el);
     if(url != "blank"){
         var file = new AudioFile(url);
-        el.className = "j";
+        this.el.className = "j";
         file.audio.oncanplaythrough = function(){
-            el.style.backgroundColor = "blue";
+            this.el.style.backgroundColor = "blue";
         };
         this.file = file;
         function timeupdate(){
-            el.childNodes[1].style.width =  (file.audio.currentTime/file.audio.duration)*100 + "%";
-            if(file.audio.currentTime == 0) el.childNodes[1].style.width =  "calc(100% - 24px)";
+            this.el.childNodes[1].style.width =  (file.audio.currentTime/file.audio.duration)*100 + "%";
+            if(file.audio.currentTime == 0) this.el.childNodes[1].style.width =  "calc(100% - 24px)";
 
             if((file.audio.currentTime - Math.round(file.audio.currentTime)) > 0.1){
-                socket.emit('time', {"nb":nb, "time":el.childNodes[1].style.width});
+                socket.emit('time', {"nb":this.nb, "time":this.el.childNodes[1].style.width});
             }
         }
-        file.audio.ontimeupdate = timeupdate;
-        function trigged(e){
-            el.className = "j";
-            if((posY - e.pageY) < -20 || (posY - e.pageY) > 20 ) window.locked = true;
-            else window.locked = false;
+        file.audio.ontimeupdate = timeupdate.bind(this);
 
-
-            if(!window.locked) {
-
-                socket.emit('play', {"nb": nb, "time": Date.now()});
-
-
-                if(file.playing()){
-                    file.stop();
-                    el.style.backgroundColor = "red";
-                }
-                else{
-                    for (var i = padn.length - 1; i >= 0; i--) {
-                        if(padn[i].file.audio.currentTime && padn[i].file.playing()) padn[i].stop();
-                    }
-                    //file.play();
-
-                    el.style.backgroundColor = "lightgreen";
-                }
-            }
-            window.locked = false;
-        }
         if ('ontouchstart' in document.documentElement) {
-            el.addEventListener('touchend', trigged, false);
-            el.addEventListener('touchmove', function(e){
+            this.el.addEventListener('touchend', this.trigged.bind(this), false);
+            this.el.addEventListener('touchmove', function(e){
                 e.stopPropagation();
 
             }, false);
-            el.addEventListener('touchstart', function(e){
+            this.el.addEventListener('touchstart', function(e){
 
-                el.className = "j jst";
-                posY = e.pageY;
-                posX = e.pageX;
+                this.el.className = "j jst";
+                this.posY = e.pageY;
+                this.posX = e.pageX;
             }, false);
         }
         else{
-            //posY = 0;
-            el.addEventListener('click', trigged, false);
+            this.el.addEventListener('click', this.trigged.bind(this), false);
         }
 
         this.stop = function(){
             file.stop();
-            el.style.backgroundColor = "red";
+            this.el.style.backgroundColor = "red";
         }
     }
     else{
-        el.className = "j blank";
+        this.el.className = "j blank";
     }
 }
+
+pad.prototype.trigged = function(e){
+    this.el.className = "j";
+    if((this.posY - e.pageY) < -20 || (this.posY - e.pageY) > 20 ) window.locked = true;
+    else window.locked = false;
+
+
+    if(!window.locked) {
+        socket.emit('play', {"nb": this.nb, "time": Date.now()});
+        if(this.file.playing()){
+            this.file.stop();
+            this.el.style.backgroundColor = "red";
+        }
+        else{
+            for (var i = padn.length - 1; i >= 0; i--) {
+                if(padn[i].file.audio.currentTime && padn[i].file.playing()) padn[i].stop();
+            }
+            this.file.play();
+            this.el.style.backgroundColor = "lightgreen";
+        }
+    }
+    window.locked = false;
+};
 
 var padn = [];
 
@@ -116,12 +113,7 @@ function preload(){
         };
 }
 
-function preloadRun(){
-    preload();
-    window.setTimeout(preload, 400);
-    window.setTimeout(preload, 800);
-    window.setTimeout(preload, 1600);
-}
+
 
 
 function getTracklist(url){
