@@ -1,10 +1,11 @@
-
 ;var audioManager = (function(){
 
-window.AudioContext = window.AudioContext || window.webkitAudioContext;
-var audioContext = new AudioContext();
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    if(window.AudioContext) var audioContext = new AudioContext();
+    else alert("WebAudio API doesn't work on this Web Browser");
 
-
+    if(window.HTMLAudioElement){}
+    else alert("Audio Element doesn't work on this Web Browser");
 
 window.gainNode = audioContext.createGain();
 window.gainNode.connect(audioContext.destination);
