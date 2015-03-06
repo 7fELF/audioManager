@@ -1,4 +1,4 @@
-var nodeAddress = "http://192.168.1.10:8080";
+var nodeAddress = "http://localhost:8080";
 var padn = [];
 var tracklistUrl = "tracklists/1.json";
 
@@ -46,31 +46,32 @@ function pad(url, col, title, nb){
         this.el.addEventListener('click', this.trigged.bind(this), false);
     }
 }
-
+// padn[11].file.AudioElement.currentTime = 221.20254166666666;
 pad.prototype.trigged = function(e){
     if((this.posY - e.pageY) < -20 || (this.posY - e.pageY) > 20 ) window.locked = true;
     else window.locked = false;
 
     if(!window.locked) {
         socket.emit('play', {"nb": this.nb, "time": Date.now()});
-        if(this.file.playing()){
+        if(this.file.playing){
             this.stop();
         }
         else{
             for (var i = padn.length - 1; i >= 0; i--) {
-                if(padn[i].file.audio.currentTime && padn[i].file.playing()) padn[i].stop();
+                if(padn[i].file.playing) padn[i].stop();
             }
-            this.file.play();
+
+            this.file.play(0);
             this.el.style.backgroundColor = "#113F59";
         }
     }
     window.locked = false;
 };
 pad.prototype.timeupdate = function(){
-    this.el.childNodes[1].style.width =  (this.file.audio.currentTime/this.file.audio.duration)*100 + "%";
-    if(this.file.audio.currentTime == 0) this.el.childNodes[1].style.width =  "calc(100% - 24px)";
-
-    if((this.file.audio.currentTime - Math.round(this.file.audio.currentTime)) > 0.1){
+    this.el.childNodes[1].style.width =  (this.file.currentTime/this.file.duration)*100 + "%";
+    if(this.file.currentTime == 0) this.el.childNodes[1].style.width =  "calc(100% - 24px)";
+    console.log(this.file.currentTime);
+    if((this.file.currentTime - Math.round(this.file.currentTime)) > 0.1){
         socket.emit('time', {"nb":this.nb, "time":this.el.childNodes[1].style.width});
     }
 };
@@ -85,12 +86,12 @@ pad.prototype.createElement = function(){
     document.getElementById("col" + this.col).appendChild(this.el);
 };
 pad.prototype.initAudio = function(){
-    this.file = new AudioFile(this.url);
-    this.file.audio.oncanplaythrough = function(){
+    this.file = new audioManager(this.url);
+    this.file.ready = function(){
         //this.el.style.backgroundColor = "#113F59";
     }.bind(this);
 
-    this.file.audio.ontimeupdate = this.timeupdate.bind(this);
+    this.file.ontimechange = this.timeupdate.bind(this);
 };
 
 function loadTrackList(tk){
@@ -134,3 +135,5 @@ socket.on('timer', function(r) {
     padn[r['nb']].el.childNodes[1].style.width = r['time'];
     padn[r['nb']].el.style.backgroundColor = "lightgreen";
 });
+
+
