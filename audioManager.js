@@ -1,27 +1,3 @@
-/*
- Preloading policies
-+----------------------------------+
-|              | none | all | auto |
-+--------------+------+-----+------+
-| audioElement |  X   |     |   X  |
-+--------------+------+-----+------+
-| WebAudioAPI  |  X   |  X  |      |
-+--------------+------+-----+------+
-
-Select technology
-+---------------------+
-+ tech | description  |
-+---------------------+
-|  1   | audioElement |
-+---------------------+
-|  2   | WebAudioAPI  |
-+------------------------------------------------+
-|  3   |  audioElement / WebAudioAPI as Failback |       
-+------------------------------------------------+
-|  4   |  WebAudioAPI / audioElement as Failback |
-+------------------------------------------------+
-*/
-
 ;var audioManager = (function() {
     /* For iOS */
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -187,23 +163,8 @@ Select technology
         }
     });
 
-    function audioManager(url, tech) {
-        if (typeof tech === "boolean" && tech) this.audio = new WebAudioAPIManager(url);
-        else if (typeof tech === "boolean" && !tech) this.audio = new WebAudioAPIManager(url);
-        else if (typeof tech === "object") this.audio = tech;
-        else if (typeof tech === "function") this.audio = new tech(url);
-        else{
-        	this.audio = new audioElementManager(url);
-        }
-    }
-
-    audioManager.prototype.play = function() {
-    	this.audio.play();
-    };
-
 
     return audioElementManager;
 })();
-
 
 audioContext = audioManager.audioContext;
