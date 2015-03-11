@@ -22,6 +22,13 @@ Select technology
 +------------------------------------------------+
 */
 
+Object.extends = function(proto, constructor){
+	var o = Object.create(proto);
+	if(typeof constructor === "undefined" && typeof proto.constructor === "function") o.constructor = proto.constructor;
+	else if(typeof constructor === "function") o.constructor = constructor;
+	return o;
+};
+
 ;var audioManager = (function() {
     /* For iOS */
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -178,6 +185,9 @@ Select technology
         }
     };
 
+    /**
+     * Variable to Get or Set the current position of the cursor on the song
+     */
     Object.defineProperty(audioElementManager.prototype, "currentTime", {
         get: function() {
             return this.AudioElement.currentTime;
@@ -197,12 +207,16 @@ Select technology
         }
     }
 
+    audioManager.prototype.BrowserCapabilities = function(){
+    	return {"AudioElement":AudioElementSupport, "WebAudioAPI":WebAudioAPISupport};
+    };
+
     audioManager.prototype.play = function() {
     	this.audio.play();
     };
 
 
-    return audioElementManager;
+    return audioManager;
 })();
 
 
