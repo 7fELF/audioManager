@@ -103,7 +103,6 @@ Object.extends = function(proto, constructor){
      * @type {Array}
      */
     audioElementManager.allInstances = [];
-    audioElementManager.audioContext = audioContext;
 
     /**
      * Stop playing on all instances
@@ -122,6 +121,7 @@ Object.extends = function(proto, constructor){
     audioElementManager.prototype.stop = function() {
         if (!this.playing) return this.currentTime;
         this.AudioElement.pause();
+        this.currentTime = 0;
         this.playing = false;
         return this.currentTime;
     };
@@ -205,7 +205,13 @@ Object.extends = function(proto, constructor){
         else{
         	this.audio = new audioElementManager(url);
         }
+
+        this.audio.ontimechange = function(time){
+            this.ontimechange(time);
+        };
     }
+
+    audioManager.audioContext = audioContext;
 
     audioManager.prototype.BrowserCapabilities = function(){
     	return {"AudioElement":AudioElementSupport, "WebAudioAPI":WebAudioAPISupport};
@@ -214,6 +220,16 @@ Object.extends = function(proto, constructor){
     audioManager.prototype.play = function() {
     	this.audio.play();
     };
+
+    audioManager.prototype.stop = function(){
+        this.audio.stop();
+    };
+
+    audioManager.ontimechange = function(time) {
+
+    };
+
+
 
 
     return audioManager;
