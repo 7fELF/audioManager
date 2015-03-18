@@ -32,6 +32,7 @@ Object.extends = function(proto, constructor){
 };
 
 ;var audioManager = (function() {
+
     /* For iOS */
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
@@ -99,9 +100,6 @@ Object.extends = function(proto, constructor){
 
     }
 
-
-
-
     /**
      * Stop playing on all instances
      * @type {void}
@@ -157,7 +155,6 @@ Object.extends = function(proto, constructor){
 
     };
 
-
     /**
      * Lis le buffer
      * @param  {int} time position du curseur
@@ -202,11 +199,191 @@ Object.extends = function(proto, constructor){
         }
     });
 
+
+
+
+    /**
+     * Gestionnaire de son utilisant AudioContext
+     * @constructor
+     * @param {string} url - Url of the audio file.
+     * @param {bool} Default false (true on iDevice), Use audio element instead WebAudioAPI
+     */
+    function WebAudioApiManager(url, UseAudioElement) {
+        /**
+         * settings vars
+         */
+        this.url = url;
+
+        /**
+         * audio vars
+         */
+        this.source = null;
+        this.buffer = null;
+
+        /**
+         * status vars
+         */
+        this.playing = false;
+        this.ready = false;
+        this.playOnLoad = false;
+
+        /**
+         * timing vars
+         */
+        this.startTime = 0;
+        this.currentTime = 0;
+        this.timeInterval = null;
+
+        /**
+         * Evenement quand le temps en cours change
+         * @event
+         * @param {float} time
+         */
+        this.ontimechange = function(time) {};
+
+        /**
+         * Evenement quand le fichier est pret à etre lu.
+         * @event
+         */
+        this.onready = function() {};
+
+        /**
+         * Evenement quand le fichier est lu entierement.
+         * @event
+         */
+        this.onend = function() {};
+
+        this.gainNode = audioContext.createGain();
+
+        this.gainNode.connect(audioContext.destination);
+
+
+        /* Charge le fichier si l'url est envoyée au constructeur */
+        if (url !== undefined) this.load(this.url);
+
+    }
+
+
+    WebAudioApiManager.audioContext = audioContext;
+
+    /**
+     * Stop playing on all instances
+     * @type {void}
+     */
+    WebAudioApiManager.stopAll = function(){
+        for (var i = WebAudioApiManager.allInstances.length - 1; i >= 0; i--) {
+            WebAudioApiManager.allInstances[i].stop();
+        }
+    };
+
+    /**
+     * stops playback
+     * @return {int} currentTime
+     */
+    WebAudioApiManager.prototype.stop = function() {
+        if(!this.playing) return this.currentTime;
+        this.source.stop();
+        this.source.disconnect();
+        this.playing = false;
+        return this.currentTime;
+    };
+
+    /**
+     * Load an audio file from url
+     * @param {string} url
+     */
+    WebAudioApiManager.prototype.load = function(url) {
+        //return true; //test
+        var request = new XMLHttpRequest();
+        request.open('GET', url, true);
+        request.responseType = 'arraybuffer';
+        request.onload = function() {
+            this.loadBuffer(request.response);
+        }.bind(this);
+        request.send();
+    };
+
+
+    /**
+     * Decode un ArrayBuffer
+     * @param buffer
+     * @return boolean
+     */
+    WebAudioApiManager.prototype.loadBuffer = function(buffer) {
+        if (buffer instanceof ArrayBuffer) {
+            window.buffer = buffer;
+            /* audioContext.decodeAudioData(buffer, function(buffer) {
+                this.buffer = buffer;
+                this.ready = true;
+                this.onready();
+                if(this.playOnLoad) this.play();
+                return true;
+            }.bind(this)); */
+        }
+        else if (buffer instanceof AudioBuffer) {
+            this.buffer = buffer;
+            this.ready = true;
+            this.onready();
+            return true;
+        } else {
+            console.error("Buffer needs to be an ArrayBuffer or AudioBuffer");
+            return false;
+        }
+    };
+
+
+    /**
+     * Lis le buffer
+     * @param  {int} time position du curseur
+     */
+    WebAudioApiManager.prototype.play = function(time) {
+        time = (time === undefined) ? 0 : time;
+        if (this.ready) {
+            if (!this.playing || this.UseAudioElement) {
+                this.startTime = audioContext.currentTime - time;
+
+                this.timeInterval = window.setInterval(function() {
+                    this.currentTime = audioContext.currentTime - this.startTime;
+                    this.ontimechange(this.currentTime);
+                    if (!this.playing) clearInterval(this.timeInterval);
+                }.bind(this), 500);
+
+                this.source = audioContext.createBufferSource();
+                this.source.buffer = this.buffer;
+                this.source.connect(this.gainNode);
+                if(Date.now()<this.latencyStartTime) this.latencyStartTime = false;
+                if(this.latencyStartTime) time =+ (Date.now() - this.latencyStartTime)/1000;
+                this.source.start(0, time, this.source.buffer.duration);
+
+
+                this.playing = true;
+                this.source.onended = function() {
+                    this.onend();
+                    this.playing = false;
+                }.bind(this);
+                return true;
+            } else {
+
+                return false;
+            }
+        }
+        else {
+            this.playOnLoad = !this.playOnLoad;
+        }
+    };
+
+
+    /**
+     * Audio Manager
+     * @constructor
+     * @param {string} url - Url of the audio file.
+     * @param {boolean, object, function} Technology used, true for WebAudioApi, false for audioElementManager. You can also pass an object, or a constructor.
+     */
     function audioManager(url, tech) {
         this.constructor.allInstances.push(this);
         
-        if (typeof tech === "boolean" && tech) this.audio = new WebAudioAPIManager(url);
-        else if (typeof tech === "boolean" && !tech) this.audio = new WebAudioAPIManager(url);
+        if (typeof tech === "boolean" && tech) this.audio = new WebAudioApiManager(url);
+        else if (typeof tech === "boolean" && !tech) this.audio = new audioElementManager(url);
         else if (typeof tech === "object") this.audio = tech;
         else if (typeof tech === "function") this.audio = new tech(url);
         else{

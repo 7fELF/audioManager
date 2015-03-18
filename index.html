@@ -35,7 +35,7 @@
 				<div class="j" ontouchstart="location.reload();"  onclick="location.reload();">Reload</div>
 				<div class="j" onclick="getTracklist(tracklistUrl);">Reload tracklist</div>
 				<a href="./test.html">Test</a>
-				<input type="range"  min="0" max="1" step="0.01" onchange="window.gainNode.gain.value = this.value">
+				<input type="range"  min="0" max="1" step="0.01" value="1" oninput="padn[0].file.audio.gainNode.gain.value = this.value">
 				<form   id="loadTrackList">
 					<input type="text" placeholder="playlist">
 					<input type="submit" value="Load">
@@ -50,7 +50,7 @@
 		<!-- javascript -->
 		<!-- // <script src="" type="text/javascript" charset="utf-8" async defer></script> -->
 		<script>
-			
+			/*
 		    var ctx = document.getElementById("canvas").getContext("2d");
 		    var analyser = audioContext.createAnalyser();
 		    analyser.fftSize = 512;
@@ -89,7 +89,7 @@
 		    requestAnimationFrame(animate);
 
 		    gainNode.connect(analyser);
-
+*/
 			
 </script>
 	</body>

@@ -11,20 +11,6 @@ document.body.addEventListener('touchmove',function(e){
     e.preventDefault();
 });
 
-function AudioFile(url) {
-    this.audio = document.createElement("audio");
-    this.audio.src = url;
-    this.audio.preload = this.elementPreload ;
-}
-
-AudioFile.prototype.playing = function(){ return !this.audio.paused; };
-AudioFile.prototype.play = function(){ this.audio.play(); };
-AudioFile.prototype.stop = function(){ this.pause(); this.audio.currentTime = 0; };
-AudioFile.prototype.goTo = function(t){ this.audio.currentTime = t; };
-AudioFile.prototype.pause = function(){ this.audio.pause(); };
-AudioFile.prototype.volume = function(v){ this.audio.volume = v; };
-AudioFile.prototype.elementPreload = "none";
-
 
 function pad(url, col, title, nb){
     this.nb = nb;
@@ -104,7 +90,9 @@ pad.prototype.destroy = function(){
 
 function loadTrackList(tk){
     for (var i = 0; i < Object.keys(tk).length; i++) {
-        padn.push(new pad(tk[i]["url"], tk[i]["c"], tk[i]["title"], i));
+        window.setTimeout(function(i){
+            padn.push(new pad(tk[i]["url"], tk[i]["c"], tk[i]["title"], i));
+        }.call(window, i), 0);
     };
 }
 
@@ -129,6 +117,7 @@ function padClear(){
     for (var i = padn.length - 1; i >= 0; i--) {
         padn[i].destroy();
     };
+    padn = [];
 }
 document.getElementById("loadTrackList").onsubmit = function(){
     padClear();
