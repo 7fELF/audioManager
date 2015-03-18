@@ -1,4 +1,6 @@
 /*
+
+
  Preloading policies
 +----------------------------------+
 |              | none | all | auto |
@@ -46,7 +48,6 @@ Object.extends = function(proto, constructor){
      * @param {bool} Default false (true on iDevice), Use audio element instead WebAudioAPI
      */
     function audioElementManager(url) {
-        this.constructor.allInstances.push(this);
 
         /**
          * set properties from constructor parameters
@@ -66,6 +67,7 @@ Object.extends = function(proto, constructor){
         /**
          * timing vars
          */
+
         this.startTime = 0;
 
         this.timeInterval = null;
@@ -98,11 +100,7 @@ Object.extends = function(proto, constructor){
     }
 
 
-    /**
-     * Variable to store all instanceof audioElementManager
-     * @type {Array}
-     */
-    audioElementManager.allInstances = [];
+
 
     /**
      * Stop playing on all instances
@@ -141,15 +139,21 @@ Object.extends = function(proto, constructor){
 
 
         this.AudioElement.oncanplaythrough = function() {
-            this.duration = this.AudioElement.duration;
+
+        }.bind(this);
+
+
+        this.AudioElement.oncanplay = function() {
+            
         }.bind(this);
 
         this.AudioElement.onplay = function() {
+           this.currentTime = this.startTime;
+        }.bind(this);
 
-        };
         this.AudioElement.onplaying = function() {
-            this.currentTime = this.startTime;
-        };
+
+        }.bind(this);
 
     };
 
@@ -159,16 +163,17 @@ Object.extends = function(proto, constructor){
      * @param  {int} time position du curseur
      */
     audioElementManager.prototype.play = function(time) {
-        time = (time === undefined) ? 0 : time;
         if (!this.playing) {
 
+            this.startTime = (time === undefined) ? 0 : time;
+
             this.AudioElement.play();
-            this.startTime = time;
 
             this.timeInterval = window.setInterval(function() {
                 this.ontimechange(this.currentTime);
                 if (!this.playing) clearInterval(this.timeInterval);
             }.bind(this), 500);
+
 
             this.playing = true;
 
@@ -198,6 +203,8 @@ Object.extends = function(proto, constructor){
     });
 
     function audioManager(url, tech) {
+        this.constructor.allInstances.push(this);
+        
         if (typeof tech === "boolean" && tech) this.audio = new WebAudioAPIManager(url);
         else if (typeof tech === "boolean" && !tech) this.audio = new WebAudioAPIManager(url);
         else if (typeof tech === "object") this.audio = tech;
@@ -205,11 +212,14 @@ Object.extends = function(proto, constructor){
         else{
         	this.audio = new audioElementManager(url);
         }
-
-        this.audio.ontimechange = function(time){
-            this.ontimechange(time);
-        };
     }
+
+    /**
+     * Variable to store all instanceof audioElementManager
+     * @type {Array}
+     */
+    audioManager.allInstances = [];
+
 
     audioManager.audioContext = audioContext;
 
@@ -225,12 +235,43 @@ Object.extends = function(proto, constructor){
         this.audio.stop();
     };
 
-    audioManager.ontimechange = function(time) {
 
-    };
+    Object.defineProperty(audioManager.prototype, "ontimechange", {
+        get: function() {
+            return this.audio.ontimechange;
+        },
+        set: function(e) {
+            this.audio.ontimechange = e;
+        }
+    });
+
+    Object.defineProperty(audioManager.prototype, "playing", {
+        get: function() {
+            return this.audio.playing;
+        },
+        set: function(e) {
+            console.error("please use play/stop functions");
+        }
+    });
+
+    Object.defineProperty(audioManager.prototype, "currentTime", {
+        get: function() {
+            return this.audio.currentTime;
+        },
+        set: function(e) {
+            this.audio.currentTime = e;
+        }
+    });
 
 
-
+    Object.defineProperty(audioManager.prototype, "duration", {
+        get: function() {
+            return this.audio.duration;
+        },
+        set: function(e) {
+           console.error("You can't change the duration !"); 
+        }
+    });
 
     return audioManager;
 })();

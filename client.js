@@ -1,7 +1,11 @@
 var nodeAddress = "http://localhost:8080";
 var padn = [];
-var tracklistUrl = "tracklists/1.json";
+var tracklistUrl = "tracklists/4.json";
 
+
+Element.prototype.remove = function(){
+    this.parentElement.removeChild(this);
+};
 
 document.body.addEventListener('touchmove',function(e){
     e.preventDefault();
@@ -12,6 +16,7 @@ function AudioFile(url) {
     this.audio.src = url;
     this.audio.preload = this.elementPreload ;
 }
+
 AudioFile.prototype.playing = function(){ return !this.audio.paused; };
 AudioFile.prototype.play = function(){ this.audio.play(); };
 AudioFile.prototype.stop = function(){ this.pause(); this.audio.currentTime = 0; };
@@ -61,23 +66,22 @@ pad.prototype.trigged = function(e){
                 if(padn[i].file.playing) padn[i].stop();
             }
 
-            this.file.play(0);
+            this.file.play();
             this.el.style.backgroundColor = "#113F59";
         }
     }
     window.locked = false;
 };
 pad.prototype.timeupdate = function(){
-    this.el.childNodes[1].style.width =  (this.file.currentTime/this.file.duration)*100 + "%";
+    this.el.childNodes[1].style.width =  "calc(" + (this.file.currentTime/this.file.duration)*100 + "% - 24px)";
     if(this.file.currentTime == 0) this.el.childNodes[1].style.width =  "calc(100% - 24px)";
-    console.log(this.file.currentTime);
     if((this.file.currentTime - Math.round(this.file.currentTime)) > 0.1){
         socket.emit('time', {"nb":this.nb, "time":this.el.childNodes[1].style.width});
     }
 };
 pad.prototype.stop = function(){
-    this.file.stop();
     this.el.style.backgroundColor = "#19BEC0";
+    this.file.stop();
 };
 pad.prototype.createElement = function(){
     this.el = document.createElement("div");
@@ -88,10 +92,14 @@ pad.prototype.createElement = function(){
 pad.prototype.initAudio = function(){
     this.file = new audioManager(this.url);
     this.file.ready = function(){
-        //this.el.style.backgroundColor = "#113F59";
     }.bind(this);
 
     this.file.ontimechange = this.timeupdate.bind(this);
+};
+
+pad.prototype.destroy = function(){
+    this.el.remove();
+    this.file = undefined;
 };
 
 function loadTrackList(tk){
@@ -114,13 +122,26 @@ function getTracklist(url){
     xhr.send(null);
 }
 
+
 getTracklist(tracklistUrl);
 
+function padClear(){
+    for (var i = padn.length - 1; i >= 0; i--) {
+        padn[i].destroy();
+    };
+}
+document.getElementById("loadTrackList").onsubmit = function(){
+    padClear();
+    getTracklist('/tracklists/' + this[0].value + '.json');
 
+    return false;
+
+}
 
 /**
  * Socket.io
  */
+ /*
 var socket = io.connect(nodeAddress);
 socket.on('play', function(r) {
     console.log('Play command from socket.io', r);
@@ -135,5 +156,11 @@ socket.on('timer', function(r) {
     padn[r['nb']].el.childNodes[1].style.width = r['time'];
     padn[r['nb']].el.style.backgroundColor = "lightgreen";
 });
+*/
 
+var socket = {
+    emit:function(){
+
+    }
+};
 
