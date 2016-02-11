@@ -28,60 +28,11 @@
 			<div class="col" id="col5">
 				<div class="j" ontouchstart="location.reload();"  onclick="location.reload();">Reload</div>
 				<div class="j" onclick="getTracklist(tracklistUrl);">Reload tracklist</div>
-				<a href="./test.html">Test</a>
-				<input type="range"  min="0" max="1" step="0.01" onchange="window.gainNode.gain.value = this.value">
 			</div>
 			<canvas id="canvas" width="512" height="100" style="position: fixed; left: 511px; bottom: -1px;"></canvas>
 		</div>
 		<link rel="stylesheet" href="style.css"/>
 		<!-- IE HTML5 -->
 		<!--[if lte IE 8]><script>(function(){var e="abbr,article,aside,audio,canvas,datalist,details,figure,footer,header,hgroup,mark,menu,meter,nav,output,progress,section,time,video".split(','),i=e.length;while(i--){document.createElement(e[i]);}}());</script><![endif]-->
-
-		<!-- javascript -->
-		<!-- // <script src="" type="text/javascript" charset="utf-8" async defer></script> -->
-		<script>
-			
-		    var ctx = document.getElementById("canvas").getContext("2d");
-		    var analyser = audioContext.createAnalyser();
-		    analyser.fftSize = 512;
-		    //analyser.connect(audioContext.destination);
-		    var frequencyBins = new Uint8Array(analyser.frequencyBinCount);
-
-		  
-
-
-		    var WIDTH = 512;
-		    var HEIGHT = 100;
-		    var value, h, w;
-
-		    function draw() {
-		        ctx.clearRect(0, 0, WIDTH, HEIGHT);
-
-		        for (var i = 0; i < frequencyBins.length; i++) {
-		            value = frequencyBins[i];
-		            h = HEIGHT * (value / 300);
-		            w = WIDTH / frequencyBins.length;
-		            var grd = ctx.createRadialGradient(0,-10,10,100,-10,200);
-					grd.addColorStop(0,"red");
-					grd.addColorStop(1,"blue");
-					ctx.fillStyle = grd;
-
-		            ctx.fillRect(i * w, HEIGHT - 1, w, -h);
-		        }
-		    };
-
-		    function animate() {
-		        analyser.getByteFrequencyData(frequencyBins);
-		        draw();
-		        requestAnimationFrame(animate);
-		    }
-
-		    requestAnimationFrame(animate);
-
-		    gainNode.connect(analyser);
-
-			
-</script>
 	</body>
-
 </html>

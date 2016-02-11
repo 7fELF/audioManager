@@ -1,20 +1,13 @@
 ;var audioManager = (function() {
-    /* For iOS */
-    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-
-    /* Check Web Browser Capabilities */
-    var WebAudioAPISupport = window.AudioContext ? true : false;
-    var AudioElementSupport = window.HTMLAudioElement ? true : false;
-    if (WebAudioAPISupport) var audioContext = new AudioContext();
-
 
     /**
-     * Gestionnaire de son utilisant l'element <audio>
+     * Audio manager unsing HTML5 <audio> element
      * @constructor
      * @param {string} url - Url of the audio file.
      * @param {bool} Default false (true on iDevice), Use audio element instead WebAudioAPI
      */
     function audioElementManager(url) {
+        console.log(this);
         this.constructor.allInstances.push(this);
 
         /**
@@ -28,51 +21,53 @@
          * status vars
          */
         this.playing = false;
-        this.ready = false;
-        this.playOnLoad = false;
-        this.elementPreload = "none";
+
+        /**
+         * config vars
+         */
+        this.preload = "none";
 
         /**
          * timing vars
          */
         this.startTime = 0;
-
         this.timeInterval = null;
-
         this.duration = null;
 
         /**
-         * Evenement quand le temps en cours change
-         * @event
+         * Event ontimechange
+         * @event when time change.
          * @param {float} time
          */
         this.ontimechange = function(time) {};
 
         /**
-         * Evenement quand le fichier est pret à etre lu.
-         * @event
-         */
-        this.onready = function() {};
-
-        /**
-         * Evenement quand le fichier est lu entierement.
-         * @event
+         * Event onend
+         * @event when the file is completly played
          */
         this.onend = function() {};
 
-
-        /* Charge le fichier si l'url est envoyée au constructeur */
+        /* Load file if the url is sent to the constructor */
         if (url !== undefined) this.load(this.url);
-
     }
 
+    /**
+     * Main audio context
+     * @type {AudioContext}
+     */
+    audioElementManager.context = new AudioContext();
+
+    /**
+     * Speaker audio node (context destination)
+     * @type {AudioDestinationNode}
+     */
+    audioElementManager.speakers = audioElementManager.context.destination;
 
     /**
      * Variable to store all instanceof audioElementManager
      * @type {Array}
      */
     audioElementManager.allInstances = [];
-    audioElementManager.audioContext = audioContext;
 
     /**
      * Stop playing on all instances
@@ -102,24 +97,22 @@
     audioElementManager.prototype.load = function(url) {
         this.AudioElement = document.createElement("audio");
         this.AudioElement.src = url;
-        this.AudioElement.preload = this.elementPreload;
+        this.AudioElement.preload = this.preload;
 
         this.AudioElement.ondurationchange = function() {
             this.duration = this.AudioElement.duration;
         }.bind(this);
-
 
         this.AudioElement.oncanplaythrough = function() {
             this.duration = this.AudioElement.duration;
         }.bind(this);
 
         this.AudioElement.onplay = function() {
+        }.bind(this);
 
-        };
         this.AudioElement.onplaying = function() {
-            this.currentTime = this.startTime;
-        };
-
+            console.log(this.currentTime);
+        }.bind(this);
     };
 
 
@@ -128,20 +121,16 @@
      * @param  {int} time position du curseur
      */
     audioElementManager.prototype.play = function(time) {
-        time = (time === undefined) ? 0 : time;
         if (!this.playing) {
-
+            time = (time == undefined) ? 0 : time;
+            this.currentTime = time;
             this.AudioElement.play();
-            this.startTime = time;
 
-            this.timeInterval = window.setInterval(function() {
+            this.AudioElement.ontimeupdate = function() {
                 this.ontimechange(this.currentTime);
-                if (!this.playing) clearInterval(this.timeInterval);
-            }.bind(this), 500);
+            }.bind(this);
 
             this.playing = true;
-
-
 
             this.AudioElement.onended = function() {
                 this.onend();
@@ -163,8 +152,5 @@
         }
     });
 
-
     return audioElementManager;
 })();
-
-audioContext = audioManager.audioContext;
