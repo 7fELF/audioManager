@@ -4,20 +4,16 @@
 
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-		<meta name="description" content="Description affichée sur google et Facebook">
-		<meta name="keywords" content="mote clef 1, Mot clef 2, etc">
 		<meta content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
 
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 
-		<script src="/socket.io.js" defer></script>
 		<script src="audioManager.js" type="text/javascript" charset="utf-8" ></script>
 		<script src="client.js" type="text/javascript" charset="utf-8" defer></script>
 
 		<title>Cartoucheur</title>
 
-		<!-- <link rel="stylesheet" href=""> -->
+		<link rel="stylesheet" href="style.css"/>
 	</head>
 	<body>
 		<div id="pad">
@@ -25,14 +21,7 @@
 			<div class="col" id="col2"></div>
 			<div class="col" id="col3"></div>
 			<div class="col" id="col4"></div>
-			<div class="col" id="col5">
-				<div class="j" ontouchstart="location.reload();"  onclick="location.reload();">Reload</div>
-				<div class="j" onclick="getTracklist(tracklistUrl);">Reload tracklist</div>
-			</div>
-			<canvas id="canvas" width="512" height="100" style="position: fixed; left: 511px; bottom: -1px;"></canvas>
+			<div class="col" id="col5"></div>
 		</div>
-		<link rel="stylesheet" href="style.css"/>
-		<!-- IE HTML5 -->
-		<!--[if lte IE 8]><script>(function(){var e="abbr,article,aside,audio,canvas,datalist,details,figure,footer,header,hgroup,mark,menu,meter,nav,output,progress,section,time,video".split(','),i=e.length;while(i--){document.createElement(e[i]);}}());</script><![endif]-->
 	</body>
 </html>

@@ -1,6 +1,7 @@
 *{
     -webkit-user-select:none;
 }
+
 body{
     margin: 0;
     padding-top: 0;
@@ -13,8 +14,8 @@ body{
     right: 0;
     background-color: #113F59;
     margin-top: 10px;
-    color: #ffffff;
 }
+
 .col{
     position:fixed;
     top:0px;
@@ -24,7 +25,6 @@ body{
     overflow-x:hidden;
     overflow-y:auto;
     -webkit-overflow-scrolling: touch;
-
 }
 
 .j{
@@ -32,36 +32,32 @@ body{
     box-sizing:border-box;
     font-size: 1em;
     word-wrap:normal;
-    height:12.5%;
+    height:6em;
     width:100%;
-    background-color: #19BEC0;
-    box-shadow: 0 0 20px -6px rgba(0, 0, 0, 0.5) inset;
+    background-color: #00818a;
     padding: 1em;
-    transition: box-shadow 200ms ease;
-    border: solid 1px rgba(0, 0, 0, 0.3);
+    /* transition: background-color 40ms ease; */
+    border: solid 2px rgba(0, 0, 0, 0.3);
+    font-family: Lato;
+    color: #f7be16;
 }
 
-.jst{
-    box-shadow: 0 0 20px -8px black inset;
-}
 .jstatus{
     position: absolute;
     bottom:20px;
     height:4px;
-    background-color:#FC4349;
-    width:calc(100% - 24px);
-    transition: width 400ms ease-in-out;
-    margin-left:1px;
+    width:calc(100% - 2em);
+}
+
+.jcurrent{
+    background-color:#f7be16;
     z-index: 2;
+
+    transition: width 400ms ease-in-out;
 }
 
 .jtotal{
-    position: absolute;
-    bottom:20px;
-    box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.8);
-    height:4px;
     background-color:black;
-    width:calc(100% - 24px);
     z-index: 1;
 }
 

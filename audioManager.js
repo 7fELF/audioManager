@@ -7,7 +7,6 @@
      * @param {bool} Default false (true on iDevice), Use audio element instead WebAudioAPI
      */
     function audioElementManager(url) {
-        console.log(this);
         this.constructor.allInstances.push(this);
 
         /**
@@ -138,7 +137,6 @@
             }.bind(this);
             return true;
         } else {
-
             return false;
         }
     };
